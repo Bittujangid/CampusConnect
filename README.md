@@ -78,4 +78,4 @@ The app will be available at `http://localhost:3000`.
 *(Add your own screenshots here to wow visitors!)*
 
 ---
-**Developed with ❤️ by Bittu Jangid & CampusConnect Team**
+**Developed with ❤️ by Bittu Jangid**
