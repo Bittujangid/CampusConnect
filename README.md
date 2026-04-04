@@ -29,12 +29,6 @@ Filter through the dashboard instantly or perform a **Deep API Search** to find 
 ### 🛡️ **Admin Control Panel**
 Secure admin modes across Events and Notices pages (Password: `admin123`) to add or remove data on the fly.
 
-### 🌀 **Premium UI/UX**
-- **Glassmorphism Cards**: Smooth blurs and sharp white borders.
-- **Shimmering Skeletons**: Professional placeholder UI while data is loading.
-- **Page Transitions**: Elegant fade-in animations on every page entry.
-
----
 
 ## 🛠️ Tech Stack
 
@@ -82,11 +76,6 @@ The app will be available at `http://localhost:3000`.
 
 ## 💻 Screenshots
 *(Add your own screenshots here to wow visitors!)*
-
----
-
-## 📜 License
-This project is licensed under the MIT License.
 
 ---
 **Developed with ❤️ by Bittu Jangid & CampusConnect Team**
