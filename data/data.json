@@ -1,0 +1,182 @@
+{
+  "notices": [
+    {
+      "id": 1,
+      "title": "Holiday Announcement",
+      "description": "The campus will be closed on Friday for the public holiday.",
+      "date": "2025-10-02",
+      "created_at": "2025-10-01T10:00:00Z"
+    },
+    {
+      "id": 2,
+      "title": "Exam Schedule Released",
+      "description": "The final exam schedule has been published on the portal.",
+      "date": "2025-10-05",
+      "created_at": "2025-10-03T14:30:00Z"
+    },
+    {
+      "id": 1771054395916,
+      "title": "Sports Week",
+      "description": "Our clg is organizing a sports event.",
+      "date": "2026-02-16",
+      "created_at": "2026-02-14T07:33:15.916Z"
+    },
+    {
+      "id": 1771138535123,
+      "title": "Mahashivratri",
+      "description": "Today is a festival of mahadev",
+      "date": "2026-02-15",
+      "created_at": "2026-02-15T06:55:35.123Z"
+    },
+    {
+      "id": 1771562978184,
+      "title": "Test Verification Notice",
+      "description": "This is a test notice for verification.",
+      "date": "2026-02-20",
+      "created_at": "2026-02-20T04:49:38.185Z"
+    },
+    {
+      "id": 1771563122279,
+      "title": "Test Verification Notice",
+      "description": "This is a test notice for verification.",
+      "date": "2026-02-20",
+      "created_at": "2026-02-20T04:52:02.279Z"
+    },
+    {
+      "id": 1771563219161,
+      "title": "PS Test Notice",
+      "description": "Test Description",
+      "date": "2025-02-20",
+      "created_at": "2026-02-20T04:53:39.161Z"
+    }
+  ],
+  "events": [
+    {
+      "id": 1771055242802,
+      "name": "Robotics Workshop",
+      "date": "2026-03-20",
+      "venue": "Lab 101",
+      "description": "Intro to Arduino",
+      "created_at": "2026-02-14T07:47:22.802Z"
+    },
+    {
+      "id": 1771055334558,
+      "name": "Sports",
+      "date": "2026-02-16",
+      "venue": "CITM COLLEGE",
+      "description": "we are happy",
+      "created_at": "2026-02-14T07:48:54.558Z"
+    }
+  ],
+  "event_registrations": [
+    {
+      "id": 1771055474126,
+      "event_id": 1771055334558,
+      "student_name": "Rohit Sharma",
+      "student_id": "rohit222",
+      "registration_date": "2026-02-14T07:51:14.126Z"
+    }
+  ],
+  "faqs": [
+    {
+      "id": 1,
+      "question": "How to register for events?",
+      "answer": "To register for an event, go to the Events page from your dashboard, browse the available events, and click on the 'Register' button for the event you wish to attend.",
+      "category": "Events"
+    },
+    {
+      "id": 2,
+      "question": "How to check notices?",
+      "answer": "All important announcements are posted on the Notices page. You can access it directly from the dashboard sidebar or the main navigation menu.",
+      "category": "General"
+    },
+    {
+      "id": 3,
+      "question": "How to use the campus map?",
+      "answer": "The Campus Map provides an interactive view of all buildings and facilities. You can search for specific locations and get directions within the campus.",
+      "category": "Facilities"
+    },
+    {
+      "id": 4,
+      "question": "How to contact administration?",
+      "answer": "You can find contact details for various departments on the Contacts page. For urgent matters, visit the Administrative Office in Block A during working hours.",
+      "category": "General"
+    },
+    {
+      "id": 5,
+      "question": "How to view my registrations?",
+      "answer": "Your registered events can be viewed in the 'My Registrations' section of your dashboard. This tracks all events you have successfully signed up for.",
+      "category": "Account"
+    },
+    {
+      "id": 6,
+      "question": "What to do if login fails?",
+      "answer": "If you cannot log in, ensure your Student ID and password are correct. If you've forgotten your password, contact the IT Support desk or use the password recovery option if available.",
+      "category": "Account"
+    },
+    {
+      "id": 7,
+      "question": "Where can I find my course material?",
+      "answer": "Course materials are usually uploaded to the Departmental Portal. Check with your respective faculty for specific platform details.",
+      "category": "General"
+    }
+  ],
+  "locations": [
+    {
+      "id": 1,
+      "name": "Library",
+      "description": "Main Campus Library",
+      "map_link": "https://maps.google.com/?q=Library"
+    },
+    {
+      "id": 2,
+      "name": "Cafeteria",
+      "description": "Student Canteen",
+      "map_link": "https://maps.google.com/?q=Cafeteria"
+    }
+  ],
+  "contacts": [
+    {
+      "id": 1,
+      "name": "Administration Office",
+      "role": "General Administration & Inquiries",
+      "phone": "+91 9876543210",
+      "email": "admin@campusconnect.edu"
+    },
+    {
+      "id": 2,
+      "name": "Admission Helpdesk",
+      "role": "Admissions & Enrollment Support",
+      "phone": "+91 9123456781",
+      "email": "admissions@campusconnect.edu"
+    },
+    {
+      "id": 3,
+      "name": "Library",
+      "role": "Central Library Services",
+      "phone": "+91 9123456780",
+      "email": "library@campusconnect.edu"
+    },
+    {
+      "id": 4,
+      "name": "Hostel Office",
+      "role": "Accommodation & Hostel Management",
+      "phone": "+91 9876543211",
+      "email": "hostel@campusconnect.edu"
+    },
+    {
+      "id": 5,
+      "name": "Security / Emergency",
+      "role": "24/7 Campus Security & Emergency",
+      "phone": "+91 9999911111",
+      "email": "security@campusconnect.edu"
+    },
+    {
+      "id": 6,
+      "name": "IT Support",
+      "role": "Technical Support & Lab Assistance",
+      "phone": "+91 9876543212",
+      "email": "itsupport@campusconnect.edu"
+    }
+  ]
+}

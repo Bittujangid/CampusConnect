@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CampusConnect - Smart Campus Assistant</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="bg-shape shape-1"></div>
+    <div class="bg-shape shape-2"></div>
+    <div class="bg-shape shape-3"></div>
+    <header>
+        <div class="container">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h1><i class="fas fa-graduation-cap"></i> Welcome to CampusConnect</h1>
+                    <p>Your smart campus assistant</p>
+                </div>
+                <div class="toolbar">
+                    <!-- Theme Toggle -->
+                    <button id="themeToggle" class="icon-btn" title="Toggle Theme">
+                        <i class="fas fa-moon"></i>
+                    </button>
+
+                    <!-- Notifications -->
+                    <div style="position: relative;">
+                        <button id="notifBell" class="icon-btn" title="Notifications">
+                            <i class="fas fa-bell"></i>
+                            <span class="badge" id="notifBadge">0</span>
+                        </button>
+                        
+                        <div id="notifDropdown" class="notif-dropdown">
+                            <div class="notif-header">
+                                <span>Notifications</span>
+                                <a href="#" style="font-size: 0.8rem; color: var(--primary-color); text-decoration: none;" onclick="clearNotifications()">Clear all</a>
+                            </div>
+                            <div id="notifList" class="notif-list">
+                                <!-- Notifications will be injected here -->
+                                <div class="notif-item">
+                                    <div class="notif-content">
+                                        <p style="text-align: center; color: var(--text-light); padding: 1rem;">No new notifications</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button onclick="logout()" class="btn-logout">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="search-container">
+            <input type="text" id="globalSearch" placeholder="Search for notices, events, or info...">
+            <i class="fas fa-search search-icon"></i>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-calendar-day"></i></div>
+                <div class="stat-info">
+                    <span class="stat-label">Total Events</span>
+                    <span class="stat-value" id="totalEventsCount">0</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                <div class="stat-info">
+                    <span class="stat-label">Registered Events</span>
+                    <span class="stat-value" id="registeredEventsCount">0</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-bullhorn"></i></div>
+                <div class="stat-info">
+                    <span class="stat-label">Latest Notices</span>
+                    <span class="stat-value" id="latestNoticesCount">0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search Results Container -->
+        <div id="searchResults" style="display: none; margin-bottom: 2rem;"></div>
+
+        <div class="dashboard-grid">
+            <a href="notices.html" class="card">
+                <div class="card-icon"><i class="fas fa-bullhorn"></i></div>
+                <h2>Notices</h2>
+                <p>Latest announcements and news</p>
+            </a>
+            <a href="events.html" class="card">
+                <div class="card-icon"><i class="fas fa-calendar-alt"></i></div>
+                <h2>Events</h2>
+                <p>Upcoming activities and registration</p>
+            </a>
+            <a href="registrations.html" class="card">
+                <div class="card-icon"><i class="fas fa-clipboard-check"></i></div>
+                <h2>My Registrations</h2>
+                <p>View your registered events</p>
+            </a>
+            <a href="faqs.html" class="card faq-card">
+                <div class="card-icon"><i class="fas fa-question-circle"></i></div>
+                <h2>FAQs</h2>
+                <p>Common questions answered</p>
+            </a>
+            <a href="map.html" class="card">
+                <div class="card-icon"><i class="fas fa-map-marked-alt"></i></div>
+                <h2>Campus Map</h2>
+                <p>Find your way around</p>
+            </a>
+            <a href="contacts.html" class="card">
+                <div class="card-icon"><i class="fas fa-phone-alt"></i></div>
+                <h2>Contacts</h2>
+                <p>Important phone numbers</p>
+            </a>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 CampusConnect. Built for Hackathon.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

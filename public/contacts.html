@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contacts - CampusConnect</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <header>
+        <div class="container">
+            <h1><i class="fas fa-phone-alt"></i> Contacts</h1>
+            <p>Important phone numbers</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="page-header">
+            <a href="dashboard.html" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+        </div>
+
+        <div id="contactsList" class="dashboard-grid">
+            <!-- Contacts will be loaded here -->
+            <div class="list-item">Loading contacts...</div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 CampusConnect</p>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            loadContacts();
+        });
+
+        async function loadContacts() {
+            const list = document.getElementById('contactsList');
+            const contacts = await fetchData('/contacts');
+
+            if (contacts.length === 0) {
+                list.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 3rem;">
+                        <i class="fas fa-address-book" style="font-size: 3rem; color: var(--accent-color); margin-bottom: 1rem; opacity: 0.5;"></i>
+                        <h2 style="color: var(--text-light);">No contacts found.</h2>
+                        <p>The contact directory is currently unavailable.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            list.innerHTML = contacts.map(contact => `
+                <div class="card" style="text-align: left; padding: 1.5rem;">
+                    <div class="card-icon" style="margin-bottom: 1rem;">
+                        <i class="fas ${getContactIcon(contact.name)}"></i>
+                    </div>
+                    <h2 style="font-size: 1.25rem; margin-bottom: 0.25rem;">${contact.name}</h2>
+                    <p style="color: var(--primary-color); font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1rem;">
+                        ${contact.role}
+                    </p>
+                    
+                    <div class="contact-details" style="display: flex; flex-direction: column; gap: 0.75rem;">
+                        <a href="tel:${contact.phone}" class="contact-link" style="text-decoration: none; color: var(--text-color); display: flex; align-items: center; gap: 0.75rem;">
+                            <i class="fas fa-phone-alt" style="color: #22c55e;"></i>
+                            <span>${contact.phone}</span>
+                        </a>
+                        <a href="mailto:${contact.email}" class="contact-link" style="text-decoration: none; color: var(--text-color); display: flex; align-items: center; gap: 0.75rem;">
+                            <i class="fas fa-envelope" style="color: var(--primary-color);"></i>
+                            <span style="font-size: 0.9rem; word-break: break-all;">${contact.email}</span>
+                        </a>
+                    </div>
+                    
+                    <div style="margin-top: 1.5rem; display: flex; gap: 0.5rem;">
+                        <a href="tel:${contact.phone}" class="btn" style="flex: 1; text-align: center; font-size: 0.85rem; padding: 0.6rem 0.5rem; display: flex; align-items: center; justify-content: center; gap: 0.4rem;">
+                            <i class="fas fa-phone"></i> Call
+                        </a>
+                        <a href="mailto:${contact.email}" class="btn" style="flex: 1; text-align: center; font-size: 0.85rem; padding: 0.6rem 0.5rem; background: var(--secondary-color); display: flex; align-items: center; justify-content: center; gap: 0.4rem;">
+                            <i class="fas fa-envelope"></i> Email
+                        </a>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function getContactIcon(name) {
+            const n = name.toLowerCase();
+            if (n.includes('admin')) return 'fa-building';
+            if (n.includes('admission')) return 'fa-user-graduate';
+            if (n.includes('library')) return 'fa-book';
+            if (n.includes('hostel')) return 'fa-hotel';
+            if (n.includes('security')) return 'fa-shield-alt';
+            if (n.includes('it')) return 'fa-laptop-code';
+            return 'fa-phone-square-alt';
+        }
+    </script>
+</body>
+
+</html>

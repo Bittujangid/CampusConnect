@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notices - CampusConnect</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .admin-only {
+            display: none;
+        }
+
+        .admin-active .admin-only {
+            display: inline-block;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="container">
+            <h1><i class="fas fa-bullhorn"></i> Notices</h1>
+            <p>Latest announcements and news</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="page-header">
+            <a href="dashboard.html" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+            <!-- Admin Toggle Button -->
+            <button id="adminToggle" class="btn" style="background-color: var(--secondary-color);">
+                <i class="fas fa-lock"></i> Admin Mode
+            </button>
+        </div>
+
+        <!-- Admin Panel (Hidden by default) -->
+        <div id="adminPanel" class="list-item admin-only" style="margin-bottom: 2rem;">
+            <h3><i class="fas fa-shield-alt"></i> Admin Panel - Add New Notice</h3>
+            <form id="addNoticeForm">
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" id="noticeTitle" required>
+                </div>
+                <div class="form-group">
+                    <label>Date</label>
+                    <input type="date" id="noticeDate" required>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="noticeDesc" rows="3" required></textarea>
+                </div>
+                <button type="submit" class="btn">Post Notice</button>
+            </form>
+        </div>
+
+        <div id="noticesList" class="list-container">
+            <!-- Notices will be loaded here -->
+            <div class="list-item">Loading notices...</div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 CampusConnect</p>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        // Use local fallback for API URL if script.js didn't load it
+        const BASE_URL = (typeof API_BASE_URL !== 'undefined') ? API_BASE_URL : 'http://localhost:3000/api';
+        console.log('Using API URL:', BASE_URL);
+
+        // Admin password (for hackathon demo - in production, use backend authentication)
+        const ADMIN_PASSWORD = 'admin123';
+        let isAdminMode = false;
+
+        // Page specific script
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM Content Loaded');
+            loadNotices();
+
+            const adminToggle = document.getElementById('adminToggle');
+            const body = document.body;
+
+            if (adminToggle) {
+                adminToggle.addEventListener('click', () => {
+                    if (!isAdminMode) {
+                        // Prompt for password
+                        const password = prompt('Enter Admin Password:');
+
+                        if (password === ADMIN_PASSWORD) {
+                            isAdminMode = true;
+                            body.classList.add('admin-active');
+                            adminToggle.innerHTML = '<i class="fas fa-unlock"></i> Exit Admin';
+                            adminToggle.style.backgroundColor = '#10b981';
+                            alert('Admin mode activated! You can now post notices.');
+                        } else if (password !== null) {
+                            alert('Incorrect password. Access denied.');
+                        }
+                    } else {
+                        // Exit admin mode
+                        isAdminMode = false;
+                        body.classList.remove('admin-active');
+                        adminToggle.innerHTML = '<i class="fas fa-lock"></i> Admin Mode';
+                        adminToggle.style.backgroundColor = 'var(--secondary-color)';
+                    }
+                });
+            }
+
+            const noticeForm = document.getElementById('addNoticeForm');
+            if (noticeForm) {
+                console.log('Notice form found, attaching listener');
+                noticeForm.addEventListener('submit', async (e) => {
+                    console.log('Form submission triggered');
+                    e.preventDefault();
+
+                    if (!isAdminMode) {
+                        alert('Admin access required!');
+                        return;
+                    }
+
+                    const titleInput = document.getElementById('noticeTitle');
+                    const dateInput = document.getElementById('noticeDate');
+                    const descInput = document.getElementById('noticeDesc');
+
+                    const title = titleInput.value;
+                    const date = dateInput.value;
+                    const description = descInput.value;
+
+                    console.log('Submitting notice:', { title, date, description });
+
+                    // Optimistic UI Update (Immediate)
+                    const tempId = Date.now();
+                    const newNoticeHTML = `
+                        <div class="list-item" id="notice-${tempId}" style="animation: fadeIn 0.5s;">
+                            <div class="meta-info">
+                                <span><i class="far fa-calendar"></i> ${new Date(date).toLocaleDateString()}</span>
+                            </div>
+                            <h3>${title}</h3>
+                            <p>${description}</p>
+                            <button class="btn admin-only" style="background-color: #ef4444; margin-top: 1rem; font-size: 0.8rem; padding: 0.5rem 1rem;">
+                                <i class="fas fa-spinner fa-spin"></i> Saving...
+                            </button>
+                        </div>
+                    `;
+
+                    const list = document.getElementById('noticesList');
+                    // Remove "No notices" message if it exists
+                    if (list.innerHTML.includes('No notices found')) {
+                        list.innerHTML = '';
+                    }
+                    list.insertAdjacentHTML('afterbegin', newNoticeHTML);
+
+                    try {
+                        const response = await fetch(`${BASE_URL}/notices`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ title, date, description })
+                        });
+
+                        console.log('Response status:', response.status);
+
+                        if (response.ok) {
+                            const result = await response.json();
+                            alert('Notice added successfully!');
+                            
+                            // Trigger dynamic notification
+                            if (typeof pushNotification === 'function') {
+                                pushNotification(`New notice posted: ${title}`, 'fa-bullhorn');
+                            }
+
+                            e.target.reset();
+                            loadNotices();
+                        } else {
+                            throw new Error('Server returned ' + response.status);
+                        }
+                    } catch (error) {
+                        console.error('Error adding notice:', error);
+                        alert('Failed to add notice: ' + error.message);
+                        // Remove the optimistic element on failure
+                        const tempEl = document.getElementById(`notice-${tempId}`);
+                        if (tempEl) tempEl.remove();
+                    }
+                });
+            } else {
+                console.error('Notice form (addNoticeForm) not found!');
+            }
+        });
+
+        async function loadNotices() {
+            const list = document.getElementById('noticesList');
+            if (!list) return;
+
+            list.innerHTML = '<div class="list-item"><i class="fas fa-spinner fa-spin"></i> Loading notices...</div>';
+
+            try {
+                // Use fetch directly to avoid dependency on global fetchData if undefined
+                const response = await fetch(`${BASE_URL}/notices`);
+                const notices = await response.json();
+                console.log('Loaded notices:', notices);
+
+                if (!Array.isArray(notices) || notices.length === 0) {
+                    list.innerHTML = '<div class="list-item">No notices found.</div>';
+                    return;
+                }
+
+                list.innerHTML = notices.map(notice => `
+                    <div class="list-item">
+                        <div class="meta-info">
+                            <span><i class="far fa-calendar"></i> ${new Date(notice.date).toLocaleDateString()}</span>
+                        </div>
+                        <h3>${notice.title}</h3>
+                        <p>${notice.description}</p>
+                        <button onclick="deleteNotice(${notice.id})" class="btn admin-only" style="background-color: #ef4444; margin-top: 1rem; font-size: 0.8rem; padding: 0.5rem 1rem;">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading notices:', error);
+                list.innerHTML = '<div class="list-item" style="color: red;">Error loading notices. Please check console.</div>';
+            }
+        }
+
+        async function deleteNotice(id) {
+            if (!isAdminMode) {
+                alert('Admin access required to delete notices!');
+                return;
+            }
+
+            if (!confirm('Are you sure you want to delete this notice?')) return;
+
+            console.log('Deleting notice with ID:', id);
+
+            try {
+                const response = await fetch(`${BASE_URL}/notices/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                const result = await response.json();
+                console.log('Delete response:', result);
+
+                if (response.ok) {
+                    alert('Notice deleted successfully!');
+                    
+                    // Trigger dynamic notification
+                    if (typeof pushNotification === 'function') {
+                        pushNotification("Notice deleted", "fa-trash-alt");
+                    }
+
+                    loadNotices();
+                } else {
+                    throw new Error(result.error || 'Failed to delete notice');
+                }
+            } catch (error) {
+                console.error('Error deleting notice:', error);
+                alert('Failed to delete notice: ' + error.message);
+            }
+        }
+    </script>
+</body>
+
+</html>

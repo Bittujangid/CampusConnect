@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Events - CampusConnect</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .admin-only {
+            display: none !important;
+        }
+
+        .admin-active .admin-only {
+            display: block !important;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="container">
+            <h1><i class="fas fa-calendar-alt"></i> Events</h1>
+            <p>Upcoming activities and registration</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="page-header">
+            <a href="dashboard.html" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+            <button id="adminToggle" class="btn" style="background-color: var(--secondary-color);">
+                <i class="fas fa-lock"></i> Admin Mode
+            </button>
+        </div>
+
+        <!-- Admin Panel (Hidden by default) -->
+        <div id="adminPanel" class="list-item admin-only" style="margin-bottom: 2rem; display: none;">
+            <h3><i class="fas fa-plus-circle"></i> Add New Event</h3>
+            <form id="addEventForm">
+                <div class="form-group">
+                    <label>Event Title</label>
+                    <input type="text" id="eventTitle" required>
+                </div>
+                <div class="form-group">
+                    <label>Date</label>
+                    <input type="date" id="eventDate" required>
+                </div>
+                <div class="form-group">
+                    <label>Venue</label>
+                    <input type="text" id="eventVenue" required>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="eventDesc" rows="3"></textarea>
+                </div>
+                <button type="submit" class="btn">Add Event</button>
+            </form>
+        </div>
+
+        <div id="eventsList" class="list-container">
+            <!-- Events will be loaded here -->
+            <div class="list-item">Loading events...</div>
+        </div>
+    </main>
+
+    <!-- Registration Modal -->
+    <div id="registerModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>Register for Event</h2>
+            <p id="modalEventName" style="margin-bottom: 1rem; color: var(--primary-color);"></p>
+            <form id="registerForm">
+                <input type="hidden" id="eventId">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="studentName" required>
+                </div>
+                <div class="form-group">
+                    <label>Student ID</label>
+                    <input type="text" id="studentId" required>
+                </div>
+                <button type="submit" class="btn" style="width: 100%;">Confirm Registration</button>
+            </form>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 CampusConnect</p>
+    </footer>
+
+    <script src="script.js"></script>
+    <script src="script.js"></script>
+    <script>
+        // Use local fallback for API URL if script.js didn't load it
+        const BASE_URL = (typeof API_BASE_URL !== 'undefined') ? API_BASE_URL : 'http://localhost:3000/api';
+
+        // Admin password (for hackathon demo - in production, use backend authentication)
+        const ADMIN_PASSWORD = 'admin123';
+        let isAdminMode = false;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadEvents();
+
+            // Pre-fill student ID if stored
+            const storedStudentId = localStorage.getItem('campus_student_id');
+            if (storedStudentId) {
+                document.getElementById('studentId').value = storedStudentId;
+            }
+
+            // Modal Logic
+            const modal = document.getElementById('registerModal');
+            const closeBtn = document.querySelector('.close-modal');
+
+            if (closeBtn) closeBtn.onclick = () => modal.classList.remove('active');
+            window.onclick = (e) => {
+                if (e.target === modal) modal.classList.remove('active');
+            }
+
+            // Admin Toggle Logic
+            const adminToggle = document.getElementById('adminToggle');
+            const body = document.body;
+
+            if (adminToggle) {
+                adminToggle.addEventListener('click', () => {
+                    if (!isAdminMode) {
+                        const password = prompt('Enter Admin Password:');
+                        if (password === ADMIN_PASSWORD) {
+                            isAdminMode = true;
+                            body.classList.add('admin-active');
+                            adminToggle.innerHTML = '<i class="fas fa-unlock"></i> Exit Admin';
+                            adminToggle.style.backgroundColor = '#10b981';
+                            alert('Admin mode activated! You can now add and delete events.');
+                            loadEvents(); // Reload to show delete buttons
+                        } else if (password !== null) {
+                            alert('Incorrect password. Access denied.');
+                        }
+                    } else {
+                        isAdminMode = false;
+                        body.classList.remove('admin-active');
+                        adminToggle.innerHTML = '<i class="fas fa-lock"></i> Admin Mode';
+                        adminToggle.style.backgroundColor = 'var(--secondary-color)';
+                        loadEvents(); // Reload to hide delete buttons
+                    }
+                });
+            }
+
+            // Add Event Form Submission
+            const addEventForm = document.getElementById('addEventForm');
+            if (addEventForm) {
+                addEventForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    if (!isAdminMode) return alert('Admin access required!');
+
+                    const name = document.getElementById('eventTitle').value;
+                    const date = document.getElementById('eventDate').value;
+                    const venue = document.getElementById('eventVenue').value;
+                    const description = document.getElementById('eventDesc').value;
+
+                    try {
+                        const response = await fetch(`${BASE_URL}/events`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ name, date, venue, description })
+                        });
+
+                        if (response.ok) {
+                            alert('Event added successfully!');
+                            
+                            // Trigger dynamic notification
+                            if (typeof pushNotification === 'function') {
+                                pushNotification(`New event added: ${name}`, 'fa-calendar-plus');
+                            }
+
+                            e.target.reset();
+                            loadEvents();
+                        } else {
+                            alert('Failed to add event.');
+                        }
+                    } catch (error) {
+                        console.error('Error adding event:', error);
+                        alert('Error connecting to server.');
+                    }
+                });
+            }
+
+            // Registration Form Submission
+            document.getElementById('registerForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const event_id = document.getElementById('eventId').value;
+                const student_name = document.getElementById('studentName').value;
+                const student_id = document.getElementById('studentId').value;
+
+                localStorage.setItem('campus_student_id', student_id);
+
+                try {
+                    const response = await fetch(`${BASE_URL}/events/register`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ event_id, student_name, student_id })
+                    });
+                    if (response.ok) {
+                        alert('Registration successful!');
+                        modal.classList.remove('active');
+                        e.target.reset();
+                        document.getElementById('studentId').value = student_id;
+                    }
+                } catch (error) {
+                    console.error('Error registering:', error);
+                    alert('Registration failed.');
+                }
+            });
+        });
+
+        async function loadEvents() {
+            const list = document.getElementById('eventsList');
+            if (!list) return;
+
+            try {
+                const response = await fetch(`${BASE_URL}/events`);
+                const events = await response.json();
+
+                if (events.length === 0) {
+                    list.innerHTML = '<div class="list-item">No upcoming events.</div>';
+                    return;
+                }
+
+                list.innerHTML = events.map(event => `
+                    <div class="list-item">
+                        <div class="meta-info">
+                            <span><i class="far fa-calendar"></i> ${new Date(event.date).toLocaleDateString()}</span>
+                            <span><i class="fas fa-map-marker-alt"></i> ${event.venue}</span>
+                        </div>
+                        <h3>${event.name}</h3>
+                        <p>${event.description}</p>
+                        <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                            <button onclick="openRegisterModal(${event.id}, '${event.name}')" class="btn">Register Now</button>
+                            ${isAdminMode ? `
+                            <button onclick="deleteEvent(${event.id})" class="btn" style="background-color: #ef4444;">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>` : ''}
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading events:', error);
+                list.innerHTML = '<div class="list-item" style="color: red;">Error loading events.</div>';
+            }
+        }
+
+        function openRegisterModal(id, name) {
+            document.getElementById('eventId').value = id;
+            document.getElementById('modalEventName').textContent = name;
+            document.getElementById('registerModal').classList.add('active');
+        }
+
+        async function deleteEvent(id) {
+            if (!isAdminMode) return alert('Admin access required!');
+            if (!confirm('Are you sure you want to delete this event?')) return;
+
+            try {
+                const response = await fetch(`${BASE_URL}/events/${id}`, { method: 'DELETE' });
+                if (response.ok) {
+                    alert('Event deleted successfully!');
+                    
+                    // Trigger dynamic notification
+                    if (typeof pushNotification === 'function') {
+                        pushNotification('Event removed', 'fa-calendar-times');
+                    }
+
+                    loadEvents();
+                } else {
+                    alert('Failed to delete event.');
+                }
+            } catch (error) {
+                console.error('Error deleting event:', error);
+                alert('Error connecting to server.');
+            }
+        }
+    </script>
+</body>
+
+</html>

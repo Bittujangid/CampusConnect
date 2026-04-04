@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAQs - CampusConnect</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <header>
+        <div class="container">
+            <h1><i class="fas fa-question-circle"></i> FAQs</h1>
+            <p>Common questions answered</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="page-header">
+            <a href="dashboard.html" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+            <h2>Frequently Asked Questions</h2>
+        </div>
+
+        <div class="search-container">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" id="faqSearch" placeholder="Search for questions or keywords...">
+        </div>
+
+        <div class="filter-container" id="categoryFilters">
+            <button class="filter-btn active" data-category="all">All</button>
+            <button class="filter-btn" data-category="General">General</button>
+            <button class="filter-btn" data-category="Events">Events</button>
+            <button class="filter-btn" data-category="Account">Account</button>
+            <button class="filter-btn" data-category="Facilities">Facilities</button>
+        </div>
+
+        <div id="faqsList" class="list-container">
+            <!-- FAQs will be loaded here -->
+            <div class="list-item">Loading FAQs...</div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 CampusConnect</p>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        let allFaqs = [];
+        let currentCategory = 'all';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadFAQs();
+
+            // Search functionality
+            document.getElementById('faqSearch').addEventListener('input', (e) => {
+                filterFAQs();
+            });
+
+            // Category filter functionality
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentCategory = btn.dataset.category;
+                    filterFAQs();
+                });
+            });
+        });
+
+        async function loadFAQs() {
+            allFaqs = await fetchData('/faqs');
+            displayFAQs(allFaqs);
+        }
+
+        function filterFAQs() {
+            const query = document.getElementById('faqSearch').value.toLowerCase();
+            
+            const filtered = allFaqs.filter(faq => {
+                const matchesSearch = faq.question.toLowerCase().includes(query) || 
+                                    faq.answer.toLowerCase().includes(query);
+                const matchesCategory = currentCategory === 'all' || faq.category === currentCategory;
+                return matchesSearch && matchesCategory;
+            });
+
+            displayFAQs(filtered);
+        }
+
+        function displayFAQs(faqs) {
+            const list = document.getElementById('faqsList');
+
+            if (faqs.length === 0) {
+                list.innerHTML = `
+                    <div class="list-item" style="text-align: center; padding: 3rem;">
+                        <i class="fas fa-search" style="font-size: 3rem; color: var(--accent-color); margin-bottom: 1rem; opacity: 0.5;"></i>
+                        <h3 style="color: var(--text-light);">No FAQs found.</h3>
+                        <p>Try searching for different keywords or check another category.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            list.innerHTML = faqs.map(faq => `
+                <div class="accordion-item">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <i class="fas ${getCategoryIcon(faq.category)}" style="color: var(--primary-color);"></i>
+                            <span>${faq.question}</span>
+                        </div>
+                        <i class="fas fa-chevron-down chevron"></i>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="answer-inner">
+                            <p>${faq.answer}</p>
+                            <div style="margin-top: 1.5rem; border-top: 1px solid rgba(0,0,0,0.05); padding-top: 1rem; display: flex; align-items: center; justify-content: space-between;">
+                                <span style="font-size: 0.85rem; color: var(--text-light);">Was this helpful?</span>
+                                <div style="display: flex; gap: 0.5rem;">
+                                    <button class="icon-btn" style="width: auto; height: auto; padding: 0.4rem 0.8rem; font-size: 0.8rem; border-radius: 8px;" onclick="feedback(this, true)">
+                                        <i class="far fa-thumbs-up"></i> Yes
+                                    </button>
+                                    <button class="icon-btn" style="width: auto; height: auto; padding: 0.4rem 0.8rem; font-size: 0.8rem; border-radius: 8px;" onclick="feedback(this, false)">
+                                        <i class="far fa-thumbs-down"></i> No
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function feedback(btn, isPositive) {
+            const container = btn.parentElement.parentElement;
+            container.innerHTML = `<span style="font-size: 0.85rem; color: #22c55e; font-weight: 600;"><i class="fas fa-check-circle"></i> Thanks for your feedback!</span>`;
+        }
+
+        function getCategoryIcon(category) {
+            switch(category) {
+                case 'Events': return 'fa-calendar-alt';
+                case 'Account': return 'fa-user-cog';
+                case 'Facilities': return 'fa-building';
+                default: return 'fa-info-circle';
+            }
+        }
+
+        function toggleAccordion(header) {
+            const item = header.parentElement;
+            const content = header.nextElementSibling;
+            const icon = header.querySelector('.chevron');
+            const isActive = item.classList.contains('active');
+
+            // Close all other accordion items
+            document.querySelectorAll('.accordion-item').forEach(otherItem => {
+                if (otherItem !== item) {
+                    otherItem.classList.remove('active');
+                    const otherContent = otherItem.querySelector('.accordion-content');
+                    otherContent.style.maxHeight = null;
+                    otherContent.classList.remove('active');
+                    otherItem.querySelector('.chevron').style.transform = 'rotate(0deg)';
+                }
+            });
+
+            // Toggle current item
+            if (isActive) {
+                item.classList.remove('active');
+                content.style.maxHeight = null;
+                content.classList.remove('active');
+                icon.style.transform = 'rotate(0deg)';
+            } else {
+                item.classList.add('active');
+                content.classList.add('active');
+                content.style.maxHeight = content.scrollHeight + "px";
+                icon.style.transform = 'rotate(180deg)';
+            }
+        }
+    </script>
+</body>
+
+</html>

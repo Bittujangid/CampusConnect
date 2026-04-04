@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Registrations - CampusConnect</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <header>
+        <div class="container">
+            <h1><i class="fas fa-clipboard-check"></i> My Registrations</h1>
+            <p>View your registered events</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="page-header">
+            <a href="dashboard.html" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+        </div>
+
+        <div class="list-item" style="margin-bottom: 2rem;">
+            <h3>Enter Your Student ID</h3>
+            <form id="studentIdForm" style="display: flex; gap: 1rem; align-items: flex-end;">
+                <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                    <label>Student ID</label>
+                    <input type="text" id="studentIdInput" placeholder="Enter your Student ID" required
+                        autocomplete="off">
+                </div>
+                <button type="submit" class="btn">View Registrations</button>
+            </form>
+        </div>
+
+        <div id="registrationsList" class="list-container" style="display: none;">
+            <!-- Registrations will be loaded here -->
+        </div>
+
+        <div id="noRegistrations" style="display: none;">
+            <div class="list-item">
+                <p style="color: var(--text-light); text-align: center;">No registrations found for this Student ID.</p>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 CampusConnect</p>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Ensure input is empty on load
+            document.getElementById('studentIdInput').value = '';
+
+            document.getElementById('studentIdForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const studentId = document.getElementById('studentIdInput').value.trim();
+
+                if (!studentId) {
+                    alert('Please enter a Student ID to view registrations.');
+                    return;
+                }
+
+                // Store student ID in localStorage ONLY after successful submission if needed, 
+                // but user asked to remove pre-fill, so we might just use it for the session or not at all.
+                // The user request says "Remove any default pre-filled... Ensure input is empty by default".
+                // It implies we shouldn't auto-fill it next time either.
+                // So I will NOT auto-fill on load. I will still save it if needed for other pages, 
+                // but the critical part is NOT reading it back into the input on load.
+
+                await loadRegistrations(studentId);
+            });
+        });
+
+        async function loadRegistrations(studentId) {
+            const listContainer = document.getElementById('registrationsList');
+            const noRegContainer = document.getElementById('noRegistrations');
+
+            const registrations = await fetchData(`/registrations/${encodeURIComponent(studentId)}`);
+
+            if (registrations.length === 0) {
+                listContainer.style.display = 'none';
+                noRegContainer.style.display = 'block';
+                return;
+            }
+
+            noRegContainer.style.display = 'none';
+            listContainer.style.display = 'block';
+
+            listContainer.innerHTML = `
+                <h2 style="margin-bottom: 1rem;">Your Registered Events (${registrations.length})</h2>
+                ${registrations.map(reg => `
+                    <div class="list-item">
+                        <h3>${reg.name}</h3>
+                        <div class="meta-info">
+                            <span><i class="far fa-calendar"></i> ${new Date(reg.date).toLocaleDateString()}</span>
+                            <span><i class="fas fa-map-marker-alt"></i> ${reg.venue}</span>
+                            <span><i class="fas fa-check-circle" style="color: green;"></i> Registered</span>
+                        </div>
+                        <p>${reg.description}</p>
+                        <p style="font-size: 0.85rem; color: var(--text-light); margin-top: 0.5rem;">
+                            Registration Date: ${new Date(reg.registration_date).toLocaleDateString()}
+                        </p>
+                    </div>
+                `).join('')}
+            `;
+        }
+    </script>
+</body>
+
+</html>
