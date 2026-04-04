@@ -26,8 +26,8 @@ Switch between a vibrant **Light Mode** and a deep, glass-based **Dark Mode** wi
 ### 🔍 **Dual-Mode Deep Search**
 Filter through the dashboard instantly or perform a **Deep API Search** to find specific details within notices, events, and FAQs with zero latency.
 
-### 🛡️ **Admin Control Panel**
-Secure admin modes across Events and Notices pages (Password: `admin123`) to add or remove data on the fly.
+### 🛡️ Admin Control Panel
+Secure admin modes across Events and Notices pages (Accessible to users with the 'admin' role) to add or remove data on the fly.
 
 
 ## 🛠️ Tech Stack

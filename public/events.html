@@ -96,8 +96,7 @@
         // Use local fallback for API URL if script.js didn't load it
         const BASE_URL = (typeof API_BASE_URL !== 'undefined') ? API_BASE_URL : 'http://localhost:3000/api';
 
-        // Admin password (for hackathon demo - in production, use backend authentication)
-        const ADMIN_PASSWORD = 'admin123';
+        // Removed hardcoded ADMIN_PASSWORD for security
         let isAdminMode = false;
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -125,16 +124,23 @@
             if (adminToggle) {
                 adminToggle.addEventListener('click', () => {
                     if (!isAdminMode) {
-                        const password = prompt('Enter Admin Password:');
-                        if (password === ADMIN_PASSWORD) {
-                            isAdminMode = true;
-                            body.classList.add('admin-active');
-                            adminToggle.innerHTML = '<i class="fas fa-unlock"></i> Exit Admin';
-                            adminToggle.style.backgroundColor = '#10b981';
-                            alert('Admin mode activated! You can now add and delete events.');
-                            loadEvents(); // Reload to show delete buttons
-                        } else if (password !== null) {
-                            alert('Incorrect password. Access denied.');
+                        // Check user role from localStorage instead of hardcoded password
+                        const userData = localStorage.getItem('campus_user');
+                        if (userData) {
+                            const user = JSON.parse(userData);
+                            if (user.role === 'admin') {
+                                isAdminMode = true;
+                                body.classList.add('admin-active');
+                                adminToggle.innerHTML = '<i class="fas fa-unlock"></i> Exit Admin';
+                                adminToggle.style.backgroundColor = '#10b981';
+                                alert('Admin mode activated! Welcome, ' + user.name);
+                                loadEvents(); // Reload to show delete buttons
+                            } else {
+                                alert('Access Denied: Admin role required. Your current role is: ' + user.role);
+                            }
+                        } else {
+                            alert('Please login first to access admin features.');
+                            window.location.href = 'login.html';
                         }
                     } else {
                         isAdminMode = false;

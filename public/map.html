@@ -133,10 +133,33 @@
             `).join('');
         }
     </script>
-    <!-- Google Maps JavaScript API -->
-    <script async defer
-        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&callback=initMap">
-        </script>
+    <script>
+        // Use a self-executing function to avoid global scope pollution
+        (async function loadGoogleMaps() {
+            try {
+                // 1. Fetch API Key from server
+                const response = await fetch('/api/config/google-maps');
+                const data = await response.json();
+                
+                if (!data.apiKey) {
+                    console.error('❌ Failed to fetch Google Maps API Key');
+                    return;
+                }
+
+                // 2. Dynamically create script tag
+                const script = document.createElement('script');
+                script.src = `https://maps.googleapis.com/maps/api/js?key=${data.apiKey}&callback=initMap`;
+                script.async = true;
+                script.defer = true;
+                
+                // 3. Append to body
+                document.body.appendChild(script);
+                console.log('✅ Google Maps script loaded dynamically');
+            } catch (error) {
+                console.error('❌ Error loading Google Maps:', error);
+            }
+        })();
+    </script>
 </body>
 
 </html>

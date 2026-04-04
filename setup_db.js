@@ -1,11 +1,12 @@
+require('dotenv').config();
 const mysql = require('mysql2');
 const fs = require('fs');
 const path = require('path');
 
 const dbConfig = {
-    host: 'localhost',
-    user: 'root',
-    password: 'krishna@#11219', // Updated with user password
+    host: process.env.DB_HOST || 'localhost',
+    user: process.env.DB_USER || 'root',
+    password: process.env.DB_PASSWORD,
     multipleStatements: true
 };
 

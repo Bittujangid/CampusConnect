@@ -167,6 +167,9 @@ app.use(async (req, res, next) => {
 });
 
 // --- ROUTES (Same as before) ---
+app.get('/api/config/google-maps', (req, res) => {
+    res.json({ apiKey: process.env.GOOGLE_MAPS_API_KEY });
+});
 const authenticateToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
