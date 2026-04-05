@@ -4,28 +4,37 @@
     --primary-dark: #1d4ed8;
     --secondary-color: #64748b;
     --accent-color: #60a5fa;
-    --glass-bg: rgba(255, 255, 255, 0.6);
-    --glass-border: rgba(255, 255, 255, 0.7);
-    --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
-    --backdrop-blur: 12px;
-    --text-color: #1e293b;
-    --text-light: #475569;
-    --text-white: #ffffff;
+    
+    /* Light Theme Defaults */
+    --bg-color: #f8fafc;
     --bg-gradient: linear-gradient(135deg, #dbeafe, #bfdbfe, #93c5fd);
-    --card-bg: rgba(255, 255, 255, 0.45);
+    --card-bg: rgba(255, 255, 255, 0.65);
+    --card-border: rgba(255, 255, 255, 0.7);
+    --text-color: #1e293b;
+    --text-light: #64748b;
+    --text-white: #ffffff;
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.8);
+    --input-bg: rgba(255, 255, 255, 0.9);
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    
     --radius: 1rem;
     --radius-sm: 0.5rem;
+    --backdrop-blur: 12px;
 }
 
 [data-theme='dark'] {
-    --text-color: #f1f5f9;
+    --bg-color: #0f172a;
+    --bg-gradient: linear-gradient(135deg, #020617, #0f172a, #17153b);
+    --card-bg: #1e293b;
+    --card-border: rgba(255, 255, 255, 0.1);
+    --text-color: #f8fafc;
     --text-light: #94a3b8;
-    --glass-bg: rgba(15, 23, 42, 0.7);
-    --glass-border: rgba(255, 255, 255, 0.08);
-    --bg-gradient: linear-gradient(135deg, #020617, #0f172a, #1e1b4b);
-    --card-bg: rgba(30, 41, 59, 0.7);
-    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+    --glass-bg: rgba(15, 23, 42, 0.85);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --input-bg: #2d3748;
     --primary-color: #60a5fa;
+    --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.15);
 }
 
 
@@ -143,19 +152,20 @@ main {
 .search-container input {
     width: 100%;
     padding: 1rem 1.5rem 1rem 3.5rem;
-    border: 2px solid rgba(255, 255, 255, 0.5);
-    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid var(--glass-border);
+    background: var(--input-bg);
+    color: var(--text-color);
     backdrop-filter: blur(4px);
     border-radius: 50px;
     font-size: 1rem;
     outline: none;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    box-shadow: var(--shadow);
 }
 
 .search-container input:focus {
     border-color: var(--primary-color);
-    background: #ffffff;
+    background: var(--card-bg);
     box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
     transform: translateY(-2px);
 }
@@ -184,13 +194,13 @@ main {
 }
 
 .stat-card {
-    background: rgba(255, 255, 255, 0.55);
+    background: var(--card-bg);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.7);
+    border: 1px solid var(--card-border);
     padding: 1.25rem 1.5rem;
     border-radius: 1.25rem;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+    box-shadow: var(--shadow);
     display: flex;
     align-items: center;
     gap: 1.25rem;
@@ -265,13 +275,13 @@ main {
 }
 
 .card {
-    background: rgba(255, 255, 255, 0.45); /* Slightly more transparent */
-    backdrop-filter: blur(12px); /* Increased blur */
+    background: var(--card-bg);
+    backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.7); /* Bright white border to define edges */
+    border: 1px solid var(--card-border);
     padding: 2rem;
     border-radius: var(--radius);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); /* More depth shadow */
+    box-shadow: var(--shadow);
     text-decoration: none;
     color: var(--text-color);
     text-align: center;
@@ -308,7 +318,7 @@ main {
     box-shadow: 0 20px 30px rgba(59, 130, 246, 0.25), 
                 0 0 15px rgba(59, 130, 246, 0.1); /* Advanced soft glow shadow */
     border-color: var(--primary-color);
-    background: rgba(255, 255, 255, 0.85); /* Slightly less transparent on hover for readability */
+    background: var(--glass-bg); /* Adjusted for theme */
 }
 
 /* Specific FAQ Card Styling */
@@ -418,20 +428,20 @@ footer {
 }
 
 .list-item {
-    background: var(--glass-bg);
+    background: var(--card-bg);
     backdrop-filter: blur(var(--backdrop-blur));
     padding: 1.75rem;
     border-radius: var(--radius);
-    box-shadow: var(--glass-shadow);
-    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--card-border);
     transition: transform 0.2s ease;
 }
 
 .list-item:hover {
     transform: translateY(-4px) scale(1.02);
-    background: rgba(255, 255, 255, 0.9) !important;
+    background: var(--glass-bg) !important;
     border-color: var(--primary-color);
-    box-shadow: 0 10px 20px rgba(59, 130, 246, 0.15);
+    box-shadow: var(--shadow);
 }
 
 .list-item:hover h3 {
@@ -476,9 +486,9 @@ footer {
 .form-group select {
     width: 100%;
     padding: 0.85rem;
-    border: 2px solid rgba(255, 255, 255, 0.5);
-    /* Glassy border */
-    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid var(--card-border);
+    background: var(--input-bg);
+    color: var(--text-color);
     border-radius: var(--radius-sm);
     font-family: inherit;
     font-size: 1rem;
@@ -490,7 +500,7 @@ footer {
 .form-group select:focus {
     outline: none;
     border-color: var(--primary-color);
-    background: #ffffff;
+    background: var(--card-bg);
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
@@ -575,11 +585,11 @@ footer {
     top: 3.5rem;
     right: 0;
     width: 320px;
-    background: var(--glass-bg);
+    background: var(--card-bg);
     backdrop-filter: blur(20px);
-    border: 1px solid var(--glass-border);
+    border: 1px solid var(--card-border);
     border-radius: 1.25rem;
-    box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    box-shadow: var(--shadow);
     display: none;
     flex-direction: column;
     z-index: 1000;
@@ -591,7 +601,7 @@ footer {
 
 .notif-header {
     padding: 1rem 1.25rem;
-    border-bottom: 1px solid var(--glass-border);
+    border-bottom: 1px solid var(--card-border);
     font-weight: 700;
     font-size: 0.95rem;
     display: flex;
@@ -606,7 +616,7 @@ footer {
 
 .notif-item {
     padding: 1rem 1.25rem;
-    border-bottom: 1px solid var(--glass-border);
+    border-bottom: 1px solid var(--card-border);
     cursor: pointer;
     transition: background 0.2s;
     display: flex;
@@ -663,12 +673,12 @@ footer {
 
 /* Accordion */
 .accordion-item {
-    background: var(--glass-bg);
+    background: var(--card-bg);
     backdrop-filter: blur(var(--backdrop-blur));
     border-radius: var(--radius);
     margin-bottom: 1rem;
-    box-shadow: var(--glass-shadow);
-    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--card-border);
     overflow: hidden;
     transition: all 0.3s ease-in-out;
 }
@@ -700,7 +710,7 @@ footer {
 }
 
 .accordion-item.active {
-    background: rgba(255, 255, 255, 0.85);
+    background: var(--glass-bg);
 }
 
 .accordion-content {
@@ -734,12 +744,12 @@ footer {
 
 .filter-btn {
     padding: 0.6rem 1.5rem;
-    background: var(--glass-bg);
-    border: 1px solid var(--glass-border);
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
     border-radius: 50px;
     cursor: pointer;
     font-weight: 600;
-    color: var(--text-light);
+    color: var(--text-color);
     transition: all 0.3s ease;
     white-space: nowrap;
 }
@@ -790,13 +800,15 @@ footer {
 }
 
 .modal-content {
-    background: #ffffff;
+    background: var(--card-bg);
+    color: var(--text-color);
     padding: 2.5rem;
     border-radius: var(--radius);
     width: 90%;
     max-width: 500px;
     position: relative;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    border: 1px solid var(--card-border);
+    box-shadow: var(--shadow);
     transform: scale(0.95);
     transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }

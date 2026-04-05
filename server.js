@@ -214,9 +214,17 @@ app.post('/api/auth/login', async (req, res) => {
 
 app.get('/api/auth/me', authenticateToken, (req, res) => res.json({ user: req.user }));
 
+// --- RBAC MIDDLEWARE ---
+const isAdmin = (req, res, next) => {
+    if (!req.user || req.user.role !== 'admin') {
+        return res.status(403).json({ error: 'Access Denied: Admins only.' });
+    }
+    next();
+};
+
 // --- EVENT ROUTES ---
 
-// Get all events
+// Get all events (Public)
 app.get('/api/events', async (req, res) => {
     try {
         const [events] = await db.query('SELECT * FROM events ORDER BY date ASC');
@@ -227,10 +235,10 @@ app.get('/api/events', async (req, res) => {
     }
 });
 
-// Add a new event
-app.post('/api/events', async (req, res) => {
+// Add a new event (Admin Only)
+app.post('/api/events', authenticateToken, isAdmin, async (req, res) => {
     const { name, date, venue, description } = req.body;
-    console.log('📬 Received new event:', { name, date, venue });
+    console.log(`📬 [ADMIN: ${req.user.name}] Adding new event:`, { name, date, venue });
 
     if (!name || !date || !venue) {
         return res.status(400).json({ error: 'Name, date, and venue are required.' });
@@ -249,9 +257,10 @@ app.post('/api/events', async (req, res) => {
     }
 });
 
-// Delete an event
-app.delete('/api/events/:id', async (req, res) => {
+// Delete an event (Admin Only)
+app.delete('/api/events/:id', authenticateToken, isAdmin, async (req, res) => {
     const { id } = req.params;
+    console.log(`🗑️ [ADMIN: ${req.user.name}] Deleting event ID: ${id}`);
     try {
         const [result] = await db.query('DELETE FROM events WHERE id = ?', [id]);
         if (result.affectedRows === 0) {
@@ -264,7 +273,7 @@ app.delete('/api/events/:id', async (req, res) => {
     }
 });
 
-// Register for an event
+// Register for an event (Public/Student)
 app.post('/api/events/register', async (req, res) => {
     const { event_id, student_name, student_id } = req.body;
     console.log(`📝 Attempting registration for Student: ${student_id}, Event ID: ${event_id}`);
@@ -326,7 +335,7 @@ app.get('/api/notices', async (req, res) => {
     }
 });
 
-app.post('/api/notices', async (req, res) => {
+app.post('/api/notices', authenticateToken, isAdmin, async (req, res) => {
     const { title, description, date } = req.body;
     if (!title || !description || !date) return res.status(400).json({ error: 'Missing required fields' });
     try {
@@ -334,7 +343,7 @@ app.post('/api/notices', async (req, res) => {
             'INSERT INTO notices (title, description, date) VALUES (?, ?, ?)',
             [title, description, date]
         );
-        console.log('✅ Notice added result:', result);
+        console.log(`✅ [ADMIN: ${req.user.name}] Notice added result:`, result);
         res.status(201).json({ message: 'Notice added successfully', id: result.insertId });
     } catch (error) {
         console.error('❌ Error adding notice:', error);
@@ -342,9 +351,9 @@ app.post('/api/notices', async (req, res) => {
     }
 });
 
-app.delete('/api/notices/:id', async (req, res) => {
+app.delete('/api/notices/:id', authenticateToken, isAdmin, async (req, res) => {
     const { id } = req.params;
-    console.log(`🗑️ Attempting to delete notice with ID: ${id}`);
+    console.log(`🗑️ [ADMIN: ${req.user.name}] Attempting to delete notice with ID: ${id}`);
     try {
         const [result] = await db.query('DELETE FROM notices WHERE id = ?', [id]);
         console.log(`✅ Notice delete result for ID ${id}: affectedRows = ${result.affectedRows}`);

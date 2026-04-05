@@ -122,25 +122,24 @@
             const body = document.body;
 
             if (adminToggle) {
+                // Determine if we should show the admin toggle button at all
+                const userData = localStorage.getItem('campus_user');
+                const user = userData ? JSON.parse(userData) : null;
+                
+                if (!user || user.role !== 'admin') {
+                    adminToggle.style.display = 'none'; // Completely hide from students
+                }
+
                 adminToggle.addEventListener('click', () => {
                     if (!isAdminMode) {
-                        // Check user role from localStorage instead of hardcoded password
-                        const userData = localStorage.getItem('campus_user');
-                        if (userData) {
-                            const user = JSON.parse(userData);
-                            if (user.role === 'admin') {
-                                isAdminMode = true;
-                                body.classList.add('admin-active');
-                                adminToggle.innerHTML = '<i class="fas fa-unlock"></i> Exit Admin';
-                                adminToggle.style.backgroundColor = '#10b981';
-                                alert('Admin mode activated! Welcome, ' + user.name);
-                                loadEvents(); // Reload to show delete buttons
-                            } else {
-                                alert('Access Denied: Admin role required. Your current role is: ' + user.role);
-                            }
+                        if (user && user.role === 'admin') {
+                            isAdminMode = true;
+                            body.classList.add('admin-active');
+                            adminToggle.innerHTML = '<i class="fas fa-unlock"></i> Exit Admin';
+                            adminToggle.style.backgroundColor = '#10b981';
+                            loadEvents(); // Reload to show delete buttons
                         } else {
-                            alert('Please login first to access admin features.');
-                            window.location.href = 'login.html';
+                            alert('Access Denied: Admin role required.');
                         }
                     } else {
                         isAdminMode = false;
@@ -164,10 +163,14 @@
                     const venue = document.getElementById('eventVenue').value;
                     const description = document.getElementById('eventDesc').value;
 
+                    const token = localStorage.getItem('campus_auth_token');
                     try {
                         const response = await fetch(`${BASE_URL}/events`, {
                             method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
+                            headers: { 
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${token}`
+                            },
                             body: JSON.stringify({ name, date, venue, description })
                         });
 
@@ -273,8 +276,12 @@
             if (!isAdminMode) return alert('Admin access required!');
             if (!confirm('Are you sure you want to delete this event?')) return;
 
+            const token = localStorage.getItem('campus_auth_token');
             try {
-                const response = await fetch(`${BASE_URL}/events/${id}`, { method: 'DELETE' });
+                const response = await fetch(`${BASE_URL}/events/${id}`, { 
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
                 if (response.ok) {
                     alert('Event deleted successfully!');
                     

@@ -84,24 +84,24 @@
             const body = document.body;
 
             if (adminToggle) {
+                // Determine if we should show the admin toggle button at all
+                const userData = localStorage.getItem('campus_user');
+                const user = userData ? JSON.parse(userData) : null;
+                
+                if (!user || user.role !== 'admin') {
+                    adminToggle.style.display = 'none'; // Completely hide from students
+                }
+
                 adminToggle.addEventListener('click', () => {
                     if (!isAdminMode) {
-                        // Check user role from localStorage instead of hardcoded password
-                        const userData = localStorage.getItem('campus_user');
-                        if (userData) {
-                            const user = JSON.parse(userData);
-                            if (user.role === 'admin') {
-                                isAdminMode = true;
-                                body.classList.add('admin-active');
-                                adminToggle.innerHTML = '<i class="fas fa-unlock"></i> Exit Admin';
-                                adminToggle.style.backgroundColor = '#10b981';
-                                alert('Admin mode activated! Welcome, ' + user.name);
-                            } else {
-                                alert('Access Denied: Admin role required. Your current role is: ' + user.role);
-                            }
+                        if (user && user.role === 'admin') {
+                            isAdminMode = true;
+                            body.classList.add('admin-active');
+                            adminToggle.innerHTML = '<i class="fas fa-unlock"></i> Exit Admin';
+                            adminToggle.style.backgroundColor = '#10b981';
+                            loadNotices(); // Reload to show delete buttons
                         } else {
-                            alert('Please login first to access admin features.');
-                            window.location.href = 'login.html';
+                            alert('Access Denied: Admin role required.');
                         }
                     } else {
                         // Exit admin mode
@@ -109,6 +109,7 @@
                         body.classList.remove('admin-active');
                         adminToggle.innerHTML = '<i class="fas fa-lock"></i> Admin Mode';
                         adminToggle.style.backgroundColor = 'var(--secondary-color)';
+                        loadNotices(); // Reload to hide delete buttons
                     }
                 });
             }
@@ -158,9 +159,13 @@
                     list.insertAdjacentHTML('afterbegin', newNoticeHTML);
 
                     try {
+                        const token = localStorage.getItem('campus_auth_token');
                         const response = await fetch(`${BASE_URL}/notices`, {
                             method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
+                            headers: { 
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${token}`
+                            },
                             body: JSON.stringify({ title, date, description })
                         });
 
@@ -239,9 +244,13 @@
             console.log('Deleting notice with ID:', id);
 
             try {
+                const token = localStorage.getItem('campus_auth_token');
                 const response = await fetch(`${BASE_URL}/notices/${id}`, {
                     method: 'DELETE',
-                    headers: { 'Content-Type': 'application/json' }
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
                 });
 
                 const result = await response.json();
