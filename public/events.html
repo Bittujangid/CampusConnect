@@ -207,7 +207,15 @@
                         body: JSON.stringify({ event_id, student_name, student_id })
                     });
                     if (response.ok) {
+                        const result = await response.json();
                         alert('Registration successful!');
+                        
+                        // Trigger dynamic notification with Server ID to prevent duplicates
+                        if (typeof pushNotification === 'function') {
+                            const eventName = document.getElementById('modalEventName').textContent;
+                            pushNotification(`Registered for: ${eventName}`, 'fa-check-circle', `reg-${result.id}`);
+                        }
+
                         modal.classList.remove('active');
                         e.target.reset();
                         document.getElementById('studentId').value = student_id;

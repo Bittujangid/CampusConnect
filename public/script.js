@@ -125,10 +125,16 @@ function initNotifications() {
  * Global Helper to trigger a new notification from any part of the app
  * @param {string} title - The notification message
  * @param {string} icon - FontAwesome icon class (e.g., 'fa-plus-circle')
+ * @param {string} customId - Optional custom ID to prevent duplicates during sync
  */
-function pushNotification(title, icon = 'fa-info-circle') {
+function pushNotification(title, icon = 'fa-info-circle', customId = null) {
+    const id = customId || `custom-${Date.now()}`;
+    
+    // Check if notification already exists to prevent duplicates
+    if (currentNotifications.some(n => n.id === id)) return;
+
     const newNotif = {
-        id: `custom-${Date.now()}`,
+        id: id,
         title: title,
         time: 'Just now',
         icon: icon
@@ -140,7 +146,7 @@ function pushNotification(title, icon = 'fa-info-circle') {
     // Auto-save and Update UI
     saveAndRender();
     
-    console.log(`🔔 Notification Pushed: ${title}`);
+    console.log(`🔔 Notification Pushed: ${title} (ID: ${id})`);
 }
 
 async function syncNotificationsWithServer() {
@@ -148,12 +154,23 @@ async function syncNotificationsWithServer() {
         const events = await fetchData('/events');
         const notices = await fetchData('/notices');
         
+        // 1. Fetch User Data for Personal Registrations
+        let registrations = [];
+        const userData = localStorage.getItem('campus_user');
+        if (userData) {
+            const user = JSON.parse(userData);
+            if (user.studentId) {
+                registrations = await fetchData(`/registrations/${user.studentId}`);
+            }
+        }
+        
         // Load dismissed history to prevent old data from returning
         const dismissed = JSON.parse(localStorage.getItem('campus_dismissed_notifs') || '[]');
         
         const freshFromServer = [
             ...events.slice(0, 3).map(e => ({ id: `ev-${e.id}`, title: `New Event: ${e.name}`, time: 'Soon', icon: 'fa-calendar-alt' })),
-            ...notices.slice(0, 3).map(n => ({ id: `nt-${n.id}`, title: `Notice: ${n.title}`, time: 'Today', icon: 'fa-bullhorn' }))
+            ...notices.slice(0, 3).map(n => ({ id: `nt-${n.id}`, title: `Notice: ${n.title}`, time: 'Today', icon: 'fa-bullhorn' })),
+            ...registrations.map(r => ({ id: `reg-${r.id}`, title: `Registered: ${r.name}`, time: 'Confirmed', icon: 'fa-check-double' }))
         ];
 
         // FILTER: Only keep notifications that haven't been dismissed AND aren't already in state

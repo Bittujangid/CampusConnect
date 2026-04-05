@@ -109,18 +109,23 @@ async function connectDB() {
 // --- MAINTENANCE MIDDLEWARE ---
 // Intercepts all API and Page requests if DB is down
 app.use(async (req, res, next) => {
-    if (dbConnected) return next();
-
-    // If requesting static files (css/js), allow them so error page looks good
-    if (req.path.endsWith('.css') || req.path.endsWith('.js') || req.path.endsWith('.png')) {
+    // If not connected, try to reconnect ONCE before failing
+    if (!dbConnected) {
+        console.log(`⚠️  Request to ${req.path} while DB is offline. Attempting quick reconnect...`);
+        const success = await connectDB();
+        if (success) return next();
+    } else {
         return next();
     }
 
-    // Try to reconnect on page load? (Optional, maybe too heavy. Let's just return error)
+    // If still requesting static files (css/js), allow them so error page looks good
+    if (req.path.endsWith('.css') || req.path.endsWith('.js') || req.path.endsWith('.png') || req.path.endsWith('.jpg')) {
+        return next();
+    }
 
     // API Request -> JSON Error
     if (req.path.startsWith('/api')) {
-        return res.status(503).json({ error: 'Service Unavailable: Database connection failed. Please contact admin.' });
+        return res.status(503).json({ error: 'Database connection failed. Please ensure MySQL is running.' });
     }
 
     // HTML Request -> Nice Error Page
@@ -132,33 +137,28 @@ app.use(async (req, res, next) => {
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>Service Unavailable - CampusConnect</title>
             <style>
-                body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f1f5f9; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; color: #334155; }
+                body { font-family: 'Inter', sans-serif; background: #f1f5f9; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; color: #334155; }
                 .card { background: white; padding: 2.5rem; border-radius: 1rem; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); max-width: 480px; text-align: center; width: 90%; }
                 h1 { color: #ef4444; margin-top: 0; font-size: 1.5rem; }
                 p { line-height: 1.6; margin-bottom: 1.5rem; }
                 .icon { font-size: 3rem; margin-bottom: 1rem; display: block; }
-                .btn { background: #3b82f6; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 0.5rem; font-size: 1rem; cursor: pointer; transition: background 0.2s; }
+                .btn { background: #3b82f6; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 0.5rem; font-size: 1rem; cursor: pointer; transition: background 0.2s; text-decoration: none; display: inline-block; }
                 .btn:hover { background: #2563eb; }
                 .tips { text-align: left; background: #fef2f2; padding: 1rem; border-radius: 0.5rem; font-size: 0.9rem; border: 1px solid #fecaca; margin-bottom: 1.5rem; }
-                .tips ul { margin: 0.5rem 0 0 1.2rem; padding: 0; }
-                .tips li { margin-bottom: 0.25rem; }
             </style>
         </head>
         <body>
             <div class="card">
                 <span class="icon">🔌</span>
                 <h1>Connection Failed</h1>
-                <p>CampusConnect cannot reach the database server. The application is currently offline.</p>
-                
+                <p>CampusConnect cannot reach the database. The application is currently offline.</p>
                 <div class="tips">
                     <strong>Troubleshooting:</strong>
-                    <ul>
-                        <li>Is <strong>MySQL Service</strong> running?</li>
-                        <li>Is the password in <code>.env</code> correct?</li>
-                        <li>Host is set to: <code>${process.env.DB_HOST}</code></li>
+                    <ul style="margin: 0.5rem 0 0 1.2rem; padding: 0;">
+                        <li>Ensure <strong>MySQL Service</strong> is running.</li>
+                        <li>Check if your <code>.env</code> credentials are correct.</li>
                     </ul>
                 </div>
-
                 <button class="btn" onclick="location.reload()">Retry Connection</button>
             </div>
         </body>
