@@ -152,9 +152,6 @@ main {
 .search-container input {
     width: 100%;
     padding: 1rem 1.5rem 1rem 3.5rem;
-    border: 1px solid var(--glass-border);
-    background: var(--input-bg);
-    color: var(--text-color);
     backdrop-filter: blur(4px);
     border-radius: 50px;
     font-size: 1rem;
@@ -164,8 +161,6 @@ main {
 }
 
 .search-container input:focus {
-    border-color: var(--primary-color);
-    background: var(--card-bg);
     box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
     transform: translateY(-2px);
 }
@@ -486,22 +481,30 @@ footer {
 .form-group select {
     width: 100%;
     padding: 0.85rem;
-    border: 1px solid var(--card-border);
-    background: var(--input-bg);
-    color: var(--text-color);
     border-radius: var(--radius-sm);
     font-family: inherit;
     font-size: 1rem;
     transition: all 0.2s;
 }
 
+.form-group textarea,
+.form-group select {
+    border: 1px solid var(--card-border);
+    background: var(--input-bg);
+    color: var(--text-color);
+}
+
 .form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
 .form-group textarea:focus,
 .form-group select:focus {
     outline: none;
     border-color: var(--primary-color);
     background: var(--card-bg);
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .btn {
@@ -797,6 +800,28 @@ footer {
 .modal.active {
     display: flex;
     opacity: 1;
+}
+
+/* Global Input Text Visibility Fixes */
+input {
+  color: #1a1a1a;
+  background-color: #ffffff;
+  caret-color: #2563eb;
+  border: 1px solid #ccc;
+}
+
+input::placeholder {
+  color: #9ca3af;
+}
+
+input:focus {
+  border-color: #2563eb;
+  outline: none;
+}
+
+[data-theme="dark"] input {
+  color: #ffffff;
+  background-color: #1e293b;
 }
 
 .modal-content {
