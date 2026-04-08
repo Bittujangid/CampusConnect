@@ -214,6 +214,51 @@ app.post('/api/auth/login', async (req, res) => {
 
 app.get('/api/auth/me', authenticateToken, (req, res) => res.json({ user: req.user }));
 
+// --- USER PROFILE ROUTES ---
+app.get('/api/profile', authenticateToken, async (req, res) => {
+    try {
+        const [users] = await db.query('SELECT id, name, email, role, studentId FROM users WHERE id = ?', [req.user.id]);
+        if (users.length === 0) return res.status(404).json({ error: 'User not found' });
+        res.json(users[0]);
+    } catch (error) {
+        console.error('❌ Error fetching profile:', error);
+        res.status(500).json({ error: 'Failed to fetch profile' });
+    }
+});
+
+app.put('/api/profile', authenticateToken, async (req, res) => {
+    const { name } = req.body;
+    if (!name) return res.status(400).json({ error: 'Name is required' });
+
+    try {
+        await db.query('UPDATE users SET name = ? WHERE id = ?', [name, req.user.id]);
+        res.json({ message: 'Profile updated successfully' });
+    } catch (error) {
+        console.error('❌ Error updating profile:', error);
+        res.status(500).json({ error: 'Failed to update profile' });
+    }
+});
+
+app.get('/api/my-registrations', authenticateToken, async (req, res) => {
+    try {
+        const [users] = await db.query('SELECT studentId FROM users WHERE id = ?', [req.user.id]);
+        if (users.length === 0) return res.status(404).json({ error: 'User not found' });
+        const studentId = users[0].studentId;
+
+        const query = `
+            SELECT e.* 
+            FROM event_registrations r 
+            JOIN events e ON r.event_id = e.id 
+            WHERE r.student_id = ?
+            ORDER BY e.date DESC
+        `;
+        const [registrations] = await db.query(query, [studentId]);
+        res.json(registrations);
+    } catch (error) {
+        console.error('❌ Error fetching my registrations:', error);
+        res.status(500).json({ error: 'Failed to fetch registrations' });
+    }
+});
 // --- RBAC MIDDLEWARE ---
 const isAdmin = (req, res, next) => {
     if (!req.user || req.user.role !== 'admin') {
