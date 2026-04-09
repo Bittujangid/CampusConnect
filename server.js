@@ -18,7 +18,7 @@ let db;
 let dbConnected = false;
 
 // Middleware
-app.use(cors());
+app.use(cors({ origin: "*" }));
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -26,26 +26,50 @@ app.use(express.static(path.join(__dirname, 'public')));
 async function connectDB() {
     try {
         console.log('🔄 Connecting to MySQL...');
+        
+        console.log('--- DB connection Debug Info ---');
+        console.log(`MYSQL_PUBLIC_URL provided: ${!!process.env.MYSQL_PUBLIC_URL}`);
+        console.log('DB_HOST:', process.env.DB_HOST || 'UNDEFINED');
+        console.log('DB_USER:', process.env.DB_USER ? '(Set)' : 'UNDEFINED');
+        console.log('DB_NAME:', process.env.DB_NAME || 'UNDEFINED');
+        console.log('DB_PORT:', process.env.DB_PORT || 'UNDEFINED');
+        console.log('--------------------------------');
 
-        // 1. Create DB if needed
-        const connection = await mysql.createConnection({
-            host: process.env.DB_HOST,
-            user: process.env.DB_USER,
-            password: process.env.DB_PASSWORD
-        });
-        await connection.query(`CREATE DATABASE IF NOT EXISTS ${process.env.DB_NAME}`);
-        await connection.end();
+        let poolConfig;
 
-        // 2. Connect to DB
-        db = mysql.createPool({
-            host: process.env.DB_HOST,
-            user: process.env.DB_USER,
-            password: process.env.DB_PASSWORD,
-            database: process.env.DB_NAME,
-            waitForConnections: true,
-            connectionLimit: 10,
-            queueLimit: 0
-        });
+        if (process.env.MYSQL_PUBLIC_URL) {
+            console.log('Using MYSQL_PUBLIC_URL for connection.');
+            poolConfig = process.env.MYSQL_PUBLIC_URL;
+        } else {
+            const missingVars = [];
+            if (!process.env.DB_HOST) missingVars.push('DB_HOST');
+            if (!process.env.DB_USER) missingVars.push('DB_USER');
+            if (!process.env.DB_PASSWORD) missingVars.push('DB_PASSWORD');
+            if (!process.env.DB_NAME) missingVars.push('DB_NAME');
+            if (!process.env.DB_PORT) missingVars.push('DB_PORT');
+
+            if (missingVars.length > 0) {
+                 console.error(`Missing required environment variables: ${missingVars.join(', ')}`);
+                 throw new Error("Missing required database environment variables");
+            }
+
+            poolConfig = {
+                host: process.env.DB_HOST,
+                user: process.env.DB_USER,
+                password: process.env.DB_PASSWORD,
+                database: process.env.DB_NAME,
+                port: Number(process.env.DB_PORT),
+                waitForConnections: true,
+                connectionLimit: 10,
+                queueLimit: 0
+            };
+        }
+
+        db = mysql.createPool(poolConfig);
+
+        // Verify connection
+        console.log('Testing connection...');
+        await db.query('SELECT 1');
 
         // 3. Create Table
         await db.query(`
@@ -95,11 +119,11 @@ async function connectDB() {
             )
         `);
 
-        console.log('✅ Database connected & synchronized');
+        console.log("Connected to MySQL ✅");
         dbConnected = true;
         return true;
     } catch (error) {
-        console.error('❌ Database Connection/Sync Failed:', error);
+        console.error("Database Connection Failed \u274c", error.message);
         if (error.sql) console.error('Last SQL attempted:', error.sql);
         dbConnected = false;
         return false;
@@ -448,7 +472,16 @@ app.get('/api/contacts', (req, res) => {
 });
 
 // Start Server
-app.listen(PORT, async () => {
-    console.log(`🚀 Server running on http://localhost:${PORT}`);
-    await connectDB();
-});
+async function startServer() {
+    const isDBConnected = await connectDB();
+    if (!isDBConnected) {
+        console.error("Server not started due to DB failure \u274C");
+        process.exit(1);
+    }
+
+    app.listen(PORT, () => {
+        console.log(`🚀 Server running on port ${PORT}`);
+    });
+}
+
+startServer();

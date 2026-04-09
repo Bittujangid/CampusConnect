@@ -91,10 +91,9 @@
     </footer>
 
     <script src="script.js"></script>
-    <script src="script.js"></script>
     <script>
         // Use local fallback for API URL if script.js didn't load it
-        const BASE_URL = (typeof API_BASE_URL !== 'undefined') ? API_BASE_URL : 'http://localhost:3000/api';
+        const BASE_URL = (typeof API_BASE_URL !== 'undefined') ? API_BASE_URL : 'https://your-backend.onrender.com/api';
 
         // Removed hardcoded ADMIN_PASSWORD for security
         let isAdminMode = false;
