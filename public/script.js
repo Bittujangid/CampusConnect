@@ -1,5 +1,7 @@
-// Global configuration
-const API_BASE_URL = 'https://your-backend.onrender.com/api';
+// Global configuration - Dynamically use local API if running locally, otherwise use production API
+const API_BASE_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
+    ? '/api' 
+    : 'https://your-backend.onrender.com/api';
 
 // Auth Check Helper
 function checkAuth() {
